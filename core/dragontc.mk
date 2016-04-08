@@ -14,7 +14,7 @@
 
 # Polly flags for use with Clang
 POLLY := -mllvm -polly \
-  -mllvm -polly-parallel -lgomp \
+  -mllvm -polly-parallel \
   -mllvm -polly-parallel-force \
   -mllvm -polly-ast-use-context \
   -mllvm -polly-vectorizer=polly \
@@ -38,7 +38,7 @@ else
 endif
 
 # Disable modules that don't work with DragonTC. Split up by arch.
-DISABLE_DTC_arm :=
+DISABLE_DTC_arm := libm libblasV8 libperfprofdcore libperfprofdutils perfprofd libjavacrypto libscrypt_static
 DISABLE_DTC_arm64 := libm libblasV8 libperfprofdcore libperfprofdutils perfprofd libjavacrypto libscrypt_static
 
 # Set DISABLE_DTC based on arch
@@ -56,7 +56,23 @@ ENABLE_DTC := \
   $(LOCAL_ENABLE_DTC)
 
 # Disable modules that dont work with Polly. Split up by arch.
-DISABLE_POLLY_arm :=
+DISABLE_POLLY_arm := \
+  libblas \
+  libF77blas \
+  libF77blasV8 \
+  libjni_latinime_common_static \
+  libLLVMCodeGen \
+  libLLVMARMCodeGen\
+  libLLVMScalarOpts \
+  libLLVMSupport \
+  libLLVMMC \
+  libmedia \
+  libminui \
+  libpng \
+  libprotobuf-cpp-lite \
+  libRSCpuRef \
+  libRS	\
+  libRSDrive
 
 DISABLE_POLLY_arm64 := \
   libbccSupport \
@@ -109,39 +125,37 @@ DISABLE_POLLY := \
   $(DISABLE_POLLY_$(TARGET_ARCH)) \
   $(DISABLE_DTC) \
   $(LOCAL_DISABLE_POLLY)
-  
-# Include ARM Mode if requested
-ifeq ($(USE_ARM_MODE),true)
-  include $(BUILD_SYSTEM)/arm.mk
+
+# Enable DragonTC on current module if requested.
+ifeq (1,$(words $(filter $(ENABLE_DTC),$(LOCAL_MODULE))))
+  my_cc := $(CLANG)
+  my_cxx := $(CLANG_CXX)
+  my_clang := true
 endif
 
-# Make sure that the current module is not blacklisted. Polly is not
-# used on host modules to reduce build time and unnecessary hassle.
-# Optimizations on host do not affect ROM performance anyways.
-ifneq (,$(filter true,$(LOCAL_CLANG)))
+ifeq ($(my_clang),true)
+  # Disable DragonTC on current module if requested.
   ifeq (1,$(words $(filter $(DISABLE_DTC),$(LOCAL_MODULE))))
     my_cc := $(AOSP_CLANG)
     my_cxx := $(AOSP_CLANG_CXX)
-  endif
-  ifndef LOCAL_IS_HOST_MODULE
-    ifneq (1,$(words $(filter $(DISABLE_POLLY),$(LOCAL_MODULE))))
-      ifdef LOCAL_CFLAGS
-        LOCAL_CFLAGS += -O3 $(POLLY)
-      else
-        LOCAL_CFLAGS := -O3 $(POLLY)
-      endif
+    ifeq ($(HOST_OS),darwin)
+      # Darwin is really bad at dealing with idiv/sdiv. Don't use krait on Darwin.
+      CLANG_CONFIG_arm_EXTRA_CFLAGS += -mcpu=cortex-a9
     else
-      ifdef LOCAL_CFLAGS
-        LOCAL_CFLAGS += -O2
-      else
-        LOCAL_CFLAGS := -O2
-      endif
+      CLANG_CONFIG_arm_EXTRA_CFLAGS += -mcpu=krait
     endif
+  else
+    CLANG_CONFIG_arm_EXTRA_CFLAGS += -mcpu=krait2
   endif
-else
-  ifeq (1,$(words $(filter $(ENABLE_DTC),$(LOCAL_MODULE))))
-    my_cc := $(CLANG)
-    my_cxx := $(CLANG_CXX)
-    my_clang := true
+  # Host modules are not optimized to improve compile time.
+  ifndef LOCAL_IS_HOST_MODULE
+    # Filter flags to reduce conflicts and commandline argument size
+    my_cflags :=  $(filter-out -Wall -Werror -g -O3 -O2 -Os -O1 -O0 -Og -Oz,$(my_cflags))
+    # Enable -O3 and Polly if not blacklisted, otherwise use -O3.
+    ifneq (1,$(words $(filter $(DISABLE_POLLY),$(LOCAL_MODULE))))
+      my_cflags += -O3 $(POLLY)
+    else
+      my_cflags += -O3
+    endif
   endif
 endif
