@@ -90,6 +90,10 @@ DISABLE_POLLY_O3 += \
 	libGLES_android
 endif
 
+ifneq ($(filter marlin,$(TARGET_DEVICE)),)
+DISABLE_POLLY_O3 += \
+	libGLES_android
+endif
 # Disable modules that dont work with Polly. Split up by arch.
 DISABLE_POLLY_arm :=  \
 	libavcdec \
