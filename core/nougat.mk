@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 UBER
+# Copyright (C) 2014-2017 UBER
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ STRICT_CLANG_LEVEL := \
 ############
 # GRAPHITE #
 ############
-
 LOCAL_DISABLE_GRAPHITE :=
 
 GRAPHITE_FLAGS := \
@@ -76,12 +75,19 @@ DISABLE_POLLY_O3 := \
 	libbluetooth_jni \
 	libbt% \
 	libosi \
-	ositests \
+	memtest \
 	net_bdtool \
 	net_hci \
 	net_test_btcore \
 	net_test_device \
-	net_test_osi
+	net_test_osi \
+	ositests \
+	recovery
+
+ifneq ($(filter marlin,$(TARGET_DEVICE)),)
+DISABLE_POLLY_O3 += \
+	libGLES_android
+endif
 
 # Disable modules that dont work with Polly. Split up by arch.
 DISABLE_POLLY_arm :=  \
@@ -96,13 +102,15 @@ DISABLE_POLLY_arm :=  \
 	libFraunhoferAAC \
 	libjni_filtershow \
 	libjni_filtershow_filters \
+	libjni_imageutil \
+	libjni_snapcammosaic \
 	libjpeg_static \
-	libLLVMCodeGen \
-	libLLVMSupport \
+	libLLVM% \
 	libmedia_jni \
 	libmpeg2dec \
 	libbnnmlowp \
 	libopus \
+	libpdfiumfpdfapi \
 	libpdfiumfxge \
 	libpdfiumjpeg \
 	librsjni \
@@ -136,7 +144,7 @@ my_conlyflags := $(filter-out -O3 -O2 -Os -O1 -O0 -Og -Oz -Wall -Werror -g -Wext
 ifneq (1,$(words $(filter $(DISABLE_POLLY_O3),$(LOCAL_MODULE))))
   my_cflags += -O3
 else
-  my_cflags += -O2
+  my_cflags += -Os
 endif
 
 ifeq ($(my_clang), true)
