@@ -75,6 +75,7 @@ DISABLE_POLLY_O3 := \
 	libbluetooth_jni \
 	libbt% \
 	libosi \
+	linker \
 	memtest \
 	net_bdtool \
 	net_hci \
@@ -144,7 +145,7 @@ my_conlyflags := $(filter-out -O3 -O2 -Os -O1 -O0 -Og -Oz -Wall -Werror -g -Wext
 ifneq (1,$(words $(filter $(DISABLE_POLLY_O3),$(LOCAL_MODULE))))
   my_cflags += -O3
 else
-  my_cflags += -Os
+  my_cflags += -O2
 endif
 
 ifeq ($(my_clang), true)
@@ -159,10 +160,6 @@ ifeq ($(my_clang), true)
       endif
     endif
   endif
-endif
-
-ifeq ($(LOCAL_CLANG),false)
-  my_cflags += -Wno-unknown-warning
 endif
 
 ifeq ($(STRICT_ALIASING),true)
@@ -182,4 +179,9 @@ ifeq ($(GRAPHITE_OPTS),true)
   ifneq ($(LOCAL_CLANG),false)
     my_cflags += $(GRAPHITE_FLAGS)
   endif
+endif
+
+ifeq ($(LOCAL_CLANG_LTO),true)
+  my_cflags += -flto -fuse-ld=gold
+  my_ldflags += -flto -fuse-ld=gold
 endif
