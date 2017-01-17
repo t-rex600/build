@@ -1388,7 +1388,7 @@ class BlockDifference(object):
     if not self.src:
       # write the output unconditionally
       script.Print(" ")
-      script.Print("Flashing System..")
+      script.Print("Flashing System...")
     else:
       script.Print("Patching %s image after verification." % (self.partition,))
 
@@ -1514,7 +1514,7 @@ class BlockDifference(object):
                          self.device, ranges_str,
                          self._HashZeroBlocks(self.tgt.extended.size())))
       script.Print(" ")
-      script.Print("Verified System..")
+      script.Print("Verified System...")
       if partition == "system":
         code = ErrorCode.SYSTEM_NONZERO_CONTENTS
       else:
@@ -1526,7 +1526,7 @@ class BlockDifference(object):
           'endif;' % (code, partition))
     else:
       script.Print(" ")
-      script.Print("Verified System..")
+      script.Print("Verified System...")
 
     if partition == "system":
       code = ErrorCode.SYSTEM_UNEXPECTED_CONTENTS

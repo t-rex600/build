@@ -652,7 +652,6 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   recovery_mount_options = OPTIONS.info_dict.get("recovery_mount_options")
 
   system_items = ItemSet("system", "META/filesystem_config.txt")
-  script.Print("Flashing System...")
   script.ShowProgress(system_progress, 0)
 
   if block_based:
