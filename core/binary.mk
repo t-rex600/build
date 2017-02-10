@@ -250,7 +250,7 @@ endif
 
 my_cppflags := $(my_cpp_std_version) $(my_cppflags)
 
-# Use our optimization script on every binary
+# Load our optimizations
 include $(BUILD_SYSTEM)/nougat.mk
 
 # arch-specific static libraries go first so that generic ones can depend on them

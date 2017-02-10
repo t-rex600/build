@@ -108,7 +108,6 @@ BUILD_NOTICE_FILE := $(BUILD_SYSTEM)/notice_files.mk
 BUILD_HOST_DALVIK_JAVA_LIBRARY := $(BUILD_SYSTEM)/host_dalvik_java_library.mk
 BUILD_HOST_DALVIK_STATIC_JAVA_LIBRARY := $(BUILD_SYSTEM)/host_dalvik_static_java_library.mk
 
-
 # ###############################################################
 # Parse out any modifier targets.
 # ###############################################################
@@ -235,7 +234,6 @@ ifeq ($(TARGET_CPU_ABI),)
   $(error No TARGET_CPU_ABI defined by board config: $(board_config_mk))
 endif
 TARGET_CPU_ABI2 := $(strip $(TARGET_CPU_ABI2))
-include $(BUILD_SYSTEM)/nougat.mk
 
 # Commands to generate .toc file common to ELF .so files.
 define _gen_toc_command_for_elf
@@ -793,12 +791,12 @@ endif
 first_non_empty_of_three = $(if $(1),$(1),$(if $(2),$(2),$(3)))
 DEX2OAT_TARGET_ARCH := $(TARGET_ARCH)
 DEX2OAT_TARGET_CPU_VARIANT := $(call first_non_empty_of_three,$(TARGET_CPU_VARIANT),$(TARGET_ARCH_VARIANT),default)
-DEX2OAT_TARGET_INSTRUCTION_SET_FEATURES := $(call first_non_empty_of_three,$(TARGET_CPU_FEATURES),default,"")
+DEX2OAT_TARGET_INSTRUCTION_SET_FEATURES := default
 
 ifdef TARGET_2ND_ARCH
 $(TARGET_2ND_ARCH_VAR_PREFIX)DEX2OAT_TARGET_ARCH := $(TARGET_2ND_ARCH)
 $(TARGET_2ND_ARCH_VAR_PREFIX)DEX2OAT_TARGET_CPU_VARIANT := $(call first_non_empty_of_three,$(TARGET_2ND_CPU_VARIANT),$(TARGET_2ND_ARCH_VARIANT),default)
-$(TARGET_2ND_ARCH_VAR_PREFIX)DEX2OAT_TARGET_INSTRUCTION_SET_FEATURES := $(call first_non_empty_of_three,$(TARGET_2ND_CPU_FEATURES),default,"")
+$(TARGET_2ND_ARCH_VAR_PREFIX)DEX2OAT_TARGET_INSTRUCTION_SET_FEATURES := default
 endif
 
 # define clang/llvm tools and global flags
