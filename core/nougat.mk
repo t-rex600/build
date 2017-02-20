@@ -119,6 +119,7 @@ DISABLE_POLLY_arm :=  \
 	libpdfiumfpdfapi \
 	libpdfiumfxge \
 	libpdfiumjpeg \
+    libpixelflinger \
 	librsjni \
 	libRSCpuRef \
 	libscrypttwrp_static \
